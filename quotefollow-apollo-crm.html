@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QuoteFollow — Apollo Leads CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Epilogue:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0d0f0b;--forest:#1a2e14;--acid:#b8f455;--cream:#f5f0e8;--muted:#7a8a6e;--border:rgba(126,200,85,0.15);--card:rgba(26,46,20,0.5);--red:#ff5c5c;--lime:#7ec855;--blue:#55b8f4;--orange:#f4a855;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Epilogue',sans-serif;background:var(--black);color:var(--cream);min-height:100vh;}
+.header{padding:20px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;border-bottom:1px solid var(--border);}
+.logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;}
+.logo span{color:var(--acid);}
+.header-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.header-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.stats{display:flex;gap:10px;flex-wrap:wrap;padding:16px 24px;border-bottom:1px solid var(--border);}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 16px;min-width:90px;text-align:center;}
+.stat-num{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--acid);}
+.stat-label{font-size:10px;color:var(--muted);margin-top:2px;}
+.toolbar{padding:12px 24px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--border);}
+input.search{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--cream);font-size:13px;font-family:'Epilogue',sans-serif;outline:none;width:220px;}
+input.search:focus{border-color:var(--acid);}
+select.fil{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--cream);font-size:12px;font-family:'Epilogue',sans-serif;outline:none;cursor:pointer;}
+.count{font-size:11px;color:var(--muted);margin-left:auto;}
+.table-wrap{padding:0 24px 24px;overflow-x:auto;}
+table{width:100%;border-collapse:collapse;min-width:1000px;}
+th{text-align:left;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:700;padding:9px 10px;border-bottom:1px solid var(--border);white-space:nowrap;background:rgba(26,46,20,0.3);cursor:pointer;}
+th:hover{color:var(--acid);}
+td{padding:10px 10px;border-bottom:1px solid rgba(126,200,85,0.05);vertical-align:top;font-size:12px;}
+tr:hover td{background:rgba(126,200,85,0.02);}
+.name{font-weight:700;color:var(--cream);font-size:13px;}
+.title{color:var(--muted);font-size:10px;margin-top:1px;}
+.company{color:var(--acid);font-size:11px;font-weight:600;}
+.email-val{font-size:11px;color:var(--cream);}
+.phone{font-family:monospace;color:var(--lime);font-size:11px;}
+.verified{font-size:9px;color:var(--acid);font-weight:700;}
+.unverified{font-size:9px;color:var(--orange);}
+.location{font-size:11px;color:var(--muted);}
+.btn{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;font-family:'Syne',sans-serif;padding:4px 9px;border-radius:6px;cursor:pointer;border:none;transition:all 0.15s;white-space:nowrap;}
+.btn-add{background:var(--acid);color:var(--black);padding:8px 16px;font-size:13px;}
+.btn-export{background:rgba(126,200,85,0.1);color:var(--lime);border:1px solid rgba(126,200,85,0.3);}
+.btn-edit{background:rgba(85,184,244,0.1);color:var(--blue);border:1px solid rgba(85,184,244,0.2);}
+.btn-del{background:rgba(255,92,92,0.1);color:var(--red);border:1px solid rgba(255,92,92,0.2);}
+.btn-wa{background:#25D366;color:#fff;}
+.btn-email{background:rgba(85,184,244,0.15);color:var(--blue);border:1px solid rgba(85,184,244,0.2);}
+.btn-cancel{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-save{background:var(--acid);color:var(--black);}
+.status-sel{background:transparent;border:1px solid var(--border);border-radius:6px;padding:3px 6px;color:var(--cream);font-size:10px;font-family:'Epilogue',sans-serif;cursor:pointer;outline:none;}
+.ext-link{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--blue);text-decoration:none;padding:1px 5px;background:rgba(85,184,244,0.08);border-radius:4px;border:1px solid rgba(85,184,244,0.15);}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px;}
+.overlay.open{display:flex;}
+.modal{background:#141a11;border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;}
+.modal-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:4px;}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:16px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.form-col{display:flex;flex-direction:column;gap:4px;}
+.form-col.full{grid-column:1/-1;}
+label{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-weight:700;}
+input[type=text],input[type=email],input[type=tel],select,textarea{background:var(--black);border:1px solid var(--border);border-radius:7px;padding:8px 11px;color:var(--cream);font-size:13px;font-family:'Epilogue',sans-serif;outline:none;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--acid);}
+textarea{resize:vertical;min-height:55px;}
+.modal-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.confirm-box{background:#141a11;border:1px solid rgba(255,92,92,0.3);border-radius:14px;padding:24px;width:100%;max-width:360px;text-align:center;}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--acid);color:var(--black);font-family:'Syne',sans-serif;font-weight:700;font-size:13px;padding:12px 20px;border-radius:10px;z-index:9999;display:none;}
+.qual-yes{font-size:9px;background:rgba(184,244,85,0.15);color:var(--acid);border:1px solid rgba(184,244,85,0.3);padding:1px 6px;border-radius:999px;font-weight:700;}
+.qual-no{font-size:9px;background:rgba(255,255,255,0.05);color:var(--muted);border:1px solid var(--border);padding:1px 6px;border-radius:999px;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="logo">Quote<span>Follow</span> — Apollo Leads CRM</div>
+    <div class="header-sub">63 verified tree service contacts · Exported from Apollo.io · hello@quotefollow.com · June 2026</div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-export" onclick="exportCSV()">⬇ Export CSV</button>
+    <button class="btn btn-add" onclick="openAdd()">+ Add Contact</button>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num" id="st-total">0</div><div class="stat-label">Total</div></div>
+  <div class="stat"><div class="stat-num" id="st-not">0</div><div class="stat-label">Not Contacted</div></div>
+  <div class="stat"><div class="stat-num" id="st-email-sent">0</div><div class="stat-label">Email Sent</div></div>
+  <div class="stat"><div class="stat-num" id="st-sms">0</div><div class="stat-label">SMS Sent</div></div>
+  <div class="stat"><div class="stat-num" id="st-replied">0</div><div class="stat-label">Replied</div></div>
+  <div class="stat"><div class="stat-num" id="st-booked">0</div><div class="stat-label">Booked ✓</div></div>
+  <div class="stat"><div class="stat-num" id="st-verified">0</div><div class="stat-label">Verified Email</div></div>
+  <div class="stat"><div class="stat-num" id="st-qualified">0</div><div class="stat-label">Qualified</div></div>
+</div>
+
+<div class="toolbar">
+  <input class="search" id="search" placeholder="🔍 Search name, company, email, city..." oninput="render()">
+  <select class="fil" id="fil-status" onchange="render()">
+    <option value="">All Statuses</option>
+    <option>Not Contacted</option>
+    <option>Email Sent</option>
+    <option>SMS Sent</option>
+    <option>Replied</option>
+    <option>Booked ✓</option>
+  </select>
+  <select class="fil" id="fil-state" onchange="render()">
+    <option value="">All States</option>
+  </select>
+  <select class="fil" id="fil-qual" onchange="render()">
+    <option value="">All Leads</option>
+    <option value="Qualified">Qualified Only</option>
+  </select>
+  <span class="count" id="count-lbl"></span>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead><tr>
+      <th>#</th>
+      <th onclick="sortBy('name')">Name ↕</th>
+      <th onclick="sortBy('company')">Company ↕</th>
+      <th>Email</th>
+      <th>Phone</th>
+      <th onclick="sortBy('state')">Location ↕</th>
+      <th>Links</th>
+      <th onclick="sortBy('status')">Status ↕</th>
+      <th>Notes</th>
+      <th>Actions</th>
+    </tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Add Contact</div>
+    <div class="modal-sub" id="modal-sub">All fields optional except First Name</div>
+    <div class="form-grid">
+      <div class="form-col"><label>First Name *</label><input type="text" id="f-fn"></div>
+      <div class="form-col"><label>Last Name</label><input type="text" id="f-ln"></div>
+      <div class="form-col"><label>Title / Role</label><input type="text" id="f-title"></div>
+      <div class="form-col"><label>Company</label><input type="text" id="f-company"></div>
+      <div class="form-col full"><label>Email</label><input type="email" id="f-email"></div>
+      <div class="form-col"><label>Phone</label><input type="tel" id="f-phone"></div>
+      <div class="form-col"><label>City</label><input type="text" id="f-city"></div>
+      <div class="form-col"><label>State</label><input type="text" id="f-state"></div>
+      <div class="form-col full"><label>Website</label><input type="text" id="f-website"></div>
+      <div class="form-col full"><label>LinkedIn URL</label><input type="text" id="f-linkedin"></div>
+      <div class="form-col full"><label>Facebook URL</label><input type="text" id="f-facebook"></div>
+      <div class="form-col"><label>Email Status</label>
+        <select id="f-emailstatus"><option>Verified</option><option>Unverified</option><option>Unknown</option></select>
+      </div>
+      <div class="form-col"><label>Outreach Status</label>
+        <select id="f-status">
+          <option>Not Contacted</option><option>Email Sent</option>
+          <option>SMS Sent</option><option>Replied</option><option>Booked ✓</option>
+        </select>
+      </div>
+      <div class="form-col full"><label>Notes</label><textarea id="f-notes"></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-save" onclick="saveRecord()">💾 Save</button>
+      <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div class="overlay" id="del-modal">
+  <div class="confirm-box">
+    <div style="font-size:28px;margin-bottom:8px;">🗑️</div>
+    <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;margin-bottom:6px;">Delete contact?</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:18px;" id="del-name">This cannot be undone.</div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button class="btn btn-del" onclick="doDelete()">Yes, Delete</button>
+      <button class="btn btn-cancel" onclick="closeDel()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let contacts = [
+  {id:1,fn:"Alec",ln:"Senofonte",title:"President",company:"Titan Tree Service, Inc.",email:"alec@titantreeserviceinc.com",emailStatus:"Verified",phone:"+1 916-837-6048",city:"Olyphant",state:"Pennsylvania",country:"United States",website:"https://titantreeservice.com",linkedin:"http://www.linkedin.com/in/alec-senofonte-0a33b248",facebook:"https://facebook.com/titantreeservice",qualified:"",status:"Not Contacted",notes:""},
+  {id:2,fn:"Jeff",ln:"Grewe",title:"Chief Executive Officer",company:"Arbor Aesthetics Tree Service",email:"jeffrey@arboraesthetics.com",emailStatus:"Verified",phone:"+1 402-408-5600",city:"Omaha",state:"Nebraska",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:3,fn:"Robert",ln:"Fogg",title:"President/CEO/Co-Owner",company:"Q-Team Tree Service",email:"robertfogg@q-team.com",emailStatus:"Verified",phone:"+1 207-693-3831",city:"Naples",state:"Maine",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:4,fn:"Tim",ln:"Dailey",title:"CEO",company:"Titan Tree Service, Inc.",email:"tim@titantreeservice.com",emailStatus:"Verified",phone:"+1 916-837-6048",city:"Sacramento",state:"California",country:"United States",website:"https://titantreeservice.com",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:5,fn:"Mario",ln:"Galo",title:"Co-Founder and CEO",company:"G&V Tree Service, Inc",email:"mario@gvtreeservice.com",emailStatus:"Verified",phone:"+1 703-569-2570",city:"Springfield",state:"Virginia",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:6,fn:"Price",ln:"Pitstick",title:"Company Owner",company:"Price Right Professional Landscaping & Tree Service",email:"pricerighttrees@offilive.com",emailStatus:"Verified",phone:"+1 817-675-8565",city:"Dallas",state:"Texas",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:7,fn:"Larry",ln:"Coalson",title:"Owner",company:"LC Tree Service",email:"larry@lctrees.com",emailStatus:"Verified",phone:"+1 619-677-5777",city:"San Diego",state:"California",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:8,fn:"BJ",ln:"Schaltenbrand",title:"Owner",company:"BeaverJack Tree Service, LLC",email:"bj@beaverjacktreeservice.com",emailStatus:"Verified",phone:"+1 724-904-7560",city:"Tarentum",state:"Pennsylvania",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:9,fn:"Gibran",ln:"Beltran",title:"General Manager",company:"New Life Tree Service",email:"gibran.beltran@newlifetreeservice.com",emailStatus:"Verified",phone:"+1 925-252-6389",city:"Bakersfield",state:"California",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:10,fn:"Amy",ln:"Grewe",title:"President & Co-Owner",company:"Arbor Aesthetics Tree Service",email:"amy@arboraesthetics.com",emailStatus:"Verified",phone:"+1 402-408-5600",city:"Omaha",state:"Nebraska",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:11,fn:"Mark",ln:"Hughes",title:"President",company:"Arborist Aboard",email:"mhughes@arboristaboard.com",emailStatus:"Verified",phone:"+1 813-920-4410",city:"Odessa",state:"Florida",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:12,fn:"Steele",ln:"Napoleon",title:"Owner",company:"Napoleon Tree Service",email:"steele@napoleontreeservice.com",emailStatus:"Verified",phone:"+1 407-733-3172",city:"Winter Park",state:"Florida",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:13,fn:"Ken",ln:"Service",title:"President",company:"Environmental Tree Care LLC",email:"service@environmentaltreecarellc.com",emailStatus:"Verified",phone:"+1 303-368-8454",city:"Englewood",state:"Colorado",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:14,fn:"Erich",ln:"Schneider",title:"Owner",company:"Schneider Tree Care",email:"erich@schneidertree.com",emailStatus:"Verified",phone:"+1 844-260-0303",city:"Taylors",state:"South Carolina",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:15,fn:"Megan",ln:"Townsend",title:"Co-Founder",company:"ALTITUDE ARBORIST - ADVANCED TREE CARE",email:"megan@altitudearborist.com",emailStatus:"Verified",phone:"+1 303-252-0818",city:"Broomfield",state:"Colorado",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:16,fn:"Scott",ln:"Griffiths",title:"President & C.E.O.",company:"Great Scott Tree Care",email:"sgriffiths@gstsinc.com",emailStatus:"Verified",phone:"+1 714-826-1750",city:"Irvine",state:"California",country:"United States",website:"https://greatscotttreecare.com",linkedin:"http://www.linkedin.com/in/scott-griffiths-035266a",facebook:"https://www.facebook.com/GreatScottTreeCare",qualified:"Qualified",status:"Not Contacted",notes:"Qualified by Apollo AI"},
+  {id:17,fn:"Jimmy",ln:"Everett",title:"Owner",company:"Everett Tree Service",email:"jimmy@everetttreeservice.com",emailStatus:"Verified",phone:"+1 919-271-6108",city:"Raleigh",state:"North Carolina",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:18,fn:"Amy",ln:"Heath",title:"Owner & CEO",company:"Texas Tree Surgeons",email:"amy@texastreesurgeons.com",emailStatus:"Verified",phone:"+1 469-387-6000",city:"Dallas",state:"Texas",country:"United States",website:"https://texastreesurgeons.com",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:19,fn:"Kelly",ln:"Kelly",title:"President",company:"Clean Cut Tree Service, Inc.",email:"kelly@cctreeservice.com",emailStatus:"Verified",phone:"+1 847-265-0000",city:"Lake Villa",state:"Illinois",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:20,fn:"Gerald",ln:"Zamora",title:"General Manager",company:"Zamora Tree Service",email:"gerald@zamoratree.com",emailStatus:"Verified",phone:"+1 678-338-9509",city:"Lawrenceville",state:"Georgia",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:21,fn:"Dave",ln:"Sheridan",title:"Owner",company:"Ascension Tree Care",email:"dave@ascensiontreecare.com",emailStatus:"Verified",phone:"+1 248-238-8781",city:"Milford Township",state:"Michigan",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:22,fn:"Shannah",ln:"Olekszak",title:"Chief Executive Officer",company:"Tree Pros, Inc.",email:"shannaho@treepros.com",emailStatus:"Verified",phone:"+1 866-928-3358",city:"Chino",state:"California",country:"United States",website:"https://treeproaz.com",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:23,fn:"David",ln:"Schmidt",title:"Owner",company:"Branch Management Tree Service",email:"david@aztreedoctor.com",emailStatus:"Verified",phone:"+1 480-970-1315",city:"Scottsdale",state:"Arizona",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:24,fn:"Noel",ln:"Boyer",title:"Owner/President",company:"All About Trees",email:"noelboyer@allabouttrees.com",emailStatus:"Verified",phone:"+1 417-863-6214",city:"Springfield",state:"Missouri",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:25,fn:"Aaron",ln:"McKamey",title:"Owner",company:"Terry's Tree Service of SW FL, LLC",email:"aaron@terrys-treeservice.com",emailStatus:"Verified",phone:"+1 941-748-4484",city:"Bradenton",state:"Florida",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:26,fn:"Richard",ln:"Schmidt",title:"Chief Executive Officer",company:"Valley Tree Care",email:"richard@valleytreecare.com",emailStatus:"Verified",phone:"+1 888-274-2372",city:"Phoenix",state:"Arizona",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:27,fn:"Chris",ln:"Ruvalcaba",title:"Company Owner",company:"Monkeyman's Tree Service",email:"chris@monkeymans.com",emailStatus:"Verified",phone:"+1 971-264-1143",city:"Lake Oswego",state:"Oregon",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:28,fn:"Joe",ln:"Phillipps",title:"Business Owner",company:"AAA Emergency Tree Service",email:"joe@aaaemergencytreeservice.com",emailStatus:"Verified",phone:"+1 303-623-6851",city:"Denver",state:"Colorado",country:"United States",website:"https://aaaemergencytreeservice.com",linkedin:"http://www.linkedin.com/in/aaatreeservicejoephillipps",facebook:"",qualified:"Qualified",status:"Not Contacted",notes:"Qualified by Apollo AI"},
+  {id:29,fn:"Luther",ln:"Marchant",title:"Vice President",company:"Schneider Tree Care",email:"luther@schneidertree.com",emailStatus:"Verified",phone:"+1 844-260-0303",city:"Greenville",state:"South Carolina",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:30,fn:"Jennifer",ln:"Roberts",title:"General Manager",company:"Premier Tree Specialists",email:"jen@premiertreesllc.com",emailStatus:"Verified",phone:"+1 216-245-8908",city:"Cleveland",state:"Ohio",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:31,fn:"Ben",ln:"Ellis",title:"Owner",company:"Southern Tree Pros",email:"ben@southerntreepros.com",emailStatus:"Verified",phone:"+1 770-841-1684",city:"Atlanta",state:"Georgia",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:32,fn:"Jorge",ln:"Mondragon",title:"Chief Executive Officer",company:"Arborpoint Tree Care Services LLC",email:"jorge@arborpointtreecare.com",emailStatus:"Verified",phone:"+1 619-277-9220",city:"Ramona",state:"California",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:33,fn:"Noah",ln:"Silverman",title:"Owner",company:"Noah's Park Tree Care",email:"noah@noahsparktreecare.com",emailStatus:"Verified",phone:"+1 775-376-0917",city:"Reno",state:"Nevada",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:34,fn:"Cacey",ln:"Crowell",title:"Chief Executive Officer",company:"Tree Pro Inc.",email:"caceycrowell@treeproinc.com",emailStatus:"Verified",phone:"+1 256-665-2162",city:"Florence",state:"Alabama",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:35,fn:"Matthew",ln:"Tubre",title:"Owner",company:"Risk Tree Service",email:"mtubre@risktreeservice.com",emailStatus:"Verified",phone:"+1 504-667-3650",city:"New Orleans",state:"Louisiana",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:36,fn:"Tyler",ln:"Richardson",title:"Owner, Founder",company:"DLL Landscaping & Tree Service",email:"trichardson@dllohio.com",emailStatus:"Verified",phone:"+1 614-471-8733",city:"Columbus",state:"Ohio",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:37,fn:"Joshua",ln:"Marotta",title:"Owner",company:"Atlanta Arbor Tree Care Specialist",email:"josh@atlantaarbor.com",emailStatus:"Verified",phone:"+1 770-765-6555",city:"Kennesaw",state:"Georgia",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:38,fn:"Jonathon",ln:"Park",title:"Founder",company:"Viking Tree Experts",email:"jonathon.park@vikingtreeexperts.com",emailStatus:"Verified",phone:"+1 704-269-5663",city:"Charlotte",state:"North Carolina",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:39,fn:"Mark",ln:"Liebert",title:"Owner/Arborist",company:"Tree Solutions LLC",email:"mark@treesolutionsllc.com",emailStatus:"Verified",phone:"+1 586-482-2000",city:"Meredith",state:"New Hampshire",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:40,fn:"Dan",ln:"Ostvig",title:"President / Owner",company:"Ostvig Tree Care",email:"dano@ostvigtree.com",emailStatus:"Verified",phone:"+1 952-473-0534",city:"Minneapolis",state:"Minnesota",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:41,fn:"Charles",ln:"Perry",title:"Owner",company:"Eden Tree Care",email:"charles@edentreecarecolorado.com",emailStatus:"Verified",phone:"+1 720-775-5365",city:"Denver",state:"Colorado",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:42,fn:"Jeff",ln:"Hempel",title:"Owner and President",company:"Leaf Tree Services",email:"jeff@leaftreeservicesatx.com",emailStatus:"Verified",phone:"+1 512-670-6766",city:"Round Rock",state:"Texas",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:43,fn:"Kelly",ln:"Frady",title:"Owner",company:"Frady Tree Care",email:"kelly@fradytreecare.com",emailStatus:"Verified",phone:"+1 704-644-2516",city:"Lexington",state:"North Carolina",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:44,fn:"Cheryl",ln:"Cartwright",title:"Owner",company:"Cartwright Tree Care",email:"cheryl@cartwrighttree.com",emailStatus:"Verified",phone:"+1 816-965-6758",city:"Grandview",state:"Missouri",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:45,fn:"Carlos",ln:"Mendoza",title:"President",company:"GREEN VALLEY TREE CARE",email:"cmendoza@greenvalleytc.com",emailStatus:"Verified",phone:"",city:"Los Angeles",state:"California",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:46,fn:"Martin",ln:"Macauley",title:"Co Owner",company:"Blooma Tree Experts",email:"martin@bloomatree.com",emailStatus:"Verified",phone:"+1 206-714-9835",city:"Seattle",state:"Washington",country:"United States",website:"https://bloomatree.com",linkedin:"http://www.linkedin.com/in/martin-macauley-a2a883142",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:47,fn:"Stosh",ln:"Kozlowski",title:"Arborist, CTSP, Owner",company:"Audubon Tree Care, LLC",email:"stosh@audubontreecare.com",emailStatus:"Verified",phone:"",city:"New Orleans",state:"Louisiana",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:48,fn:"Corey",ln:"Parshall",title:"Founder",company:"Parshall Tree Care Experts",email:"corey@parshalltreecare.com",emailStatus:"Verified",phone:"",city:"Grand Rapids",state:"Michigan",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:49,fn:"Stewart",ln:"Roberts",title:"Owner/ISA Certified Arborist",company:"Frady Tree Care",email:"stewart@fradytreecare.com",emailStatus:"Verified",phone:"+1 704-644-2516",city:"Charlotte",state:"North Carolina",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:50,fn:"Sam",ln:"Youmans",title:"Assistant General Manager",company:"AKA Tree Service",email:"sam@akatreeservice.com",emailStatus:"Verified",phone:"+1 404-713-4305",city:"McDonough",state:"Georgia",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:51,fn:"Krystal",ln:"Wood",title:"Owner",company:"All Woods Tree Service",email:"krystal.wood@allwoodstreeservice.net",emailStatus:"Verified",phone:"+1 801-476-9181",city:"Ogden",state:"Utah",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:52,fn:"Angela",ln:"Wilson",title:"President",company:"Arbor Conscious Tree Service",email:"angela@arborconscious.com",emailStatus:"Verified",phone:"",city:"Gainesville",state:"Florida",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:53,fn:"Andrew",ln:"Pelfrey",title:"Founder & President",company:"Pelfrey Tree Service",email:"andrew@pelfreytree.com",emailStatus:"Verified",phone:"+1 904-884-3900",city:"Fort Myers",state:"Florida",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:54,fn:"Warren",ln:"Reece",title:"Vice President",company:"Southern Tree Pros",email:"warren@southerntreepros.com",emailStatus:"Verified",phone:"+1 770-841-1684",city:"Oxford",state:"Mississippi",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:55,fn:"Dan",ln:"Dunn",title:"President",company:"SkyView Tree Experts, Inc",email:"dan@skyview-tree.com",emailStatus:"Verified",phone:"+1 707-999-2988",city:"Santa Rosa",state:"California",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:56,fn:"Chris",ln:"Eaton",title:"Vice President",company:"Rolling Green Inc. Tree Care",email:"chris.eaton@rgtreecare.com",emailStatus:"Verified",phone:"+1 530-721-7010",city:"Sacramento",state:"California",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:57,fn:"Bryan",ln:"Hisey",title:"President",company:"Certified Tree Care LLC",email:"bryan@certifiedtreecarellc.com",emailStatus:"Verified",phone:"+1 800-609-2358",city:"Austin",state:"Texas",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:58,fn:"David",ln:"Hall",title:"Founder, Owner & ISA Certified Arborist",company:"Top Tier Trees",email:"david@toptiertrees.com",emailStatus:"Verified",phone:"+1 678-910-0066",city:"Atlanta",state:"Georgia",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:59,fn:"Aaron",ln:"Gosselin",title:"President",company:"Q-Team Tree Service",email:"aaron.gosselin@q-team.com",emailStatus:"Verified",phone:"+1 207-693-3831",city:"Naples",state:"Maine",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:60,fn:"Lynnette",ln:"Coalson",title:"Vice President",company:"LC Tree Service",email:"lynnette@lctrees.com",emailStatus:"Verified",phone:"+1 619-677-5777",city:"",state:"California",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:61,fn:"Ryan",ln:"Tacheff",title:"General Manager",company:"LC Tree Service",email:"ryan@lctrees.com",emailStatus:"Verified",phone:"+1 619-677-5777",city:"Santee",state:"California",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:62,fn:"Jay",ln:"Jorbin",title:"Owner",company:"Joshua Tree Experts - North Dallas, TX",email:"jjorbin@joshuatreeexperts.com",emailStatus:"Verified",phone:"",city:"Buffalo Grove",state:"Illinois",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+  {id:63,fn:"Chris",ln:"Burnett",title:"Owner",company:"Joshua Tree Experts - North Dallas, TX",email:"cburnett@joshuatreeexperts.com",emailStatus:"Verified",phone:"",city:"Dallas",state:"Texas",country:"United States",website:"",linkedin:"",facebook:"",qualified:"",status:"Not Contacted",notes:""},
+];
+
+let nextId = 64;
+let editId = null;
+let deleteId = null;
+let sortKey = 'fn';
+let sortDir = 1;
+
+// Populate state filter
+const states = [...new Set(contacts.map(c=>c.state).filter(Boolean))].sort();
+const sel = document.getElementById('fil-state');
+states.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; sel.appendChild(o); });
+
+const statusColors = {
+  'Not Contacted':'background:rgba(255,255,255,0.05);color:var(--muted)',
+  'Email Sent':'background:rgba(85,184,244,0.15);color:#60a5fa',
+  'SMS Sent':'background:rgba(244,168,85,0.15);color:var(--orange)',
+  'Replied':'background:rgba(184,244,85,0.15);color:var(--acid)',
+  'Booked ✓':'background:rgba(126,200,85,0.2);color:var(--lime)'
+};
+
+function getFiltered(){
+  const q=(document.getElementById('search').value||'').toLowerCase();
+  const fs=document.getElementById('fil-status').value;
+  const fst=document.getElementById('fil-state').value;
+  const fq=document.getElementById('fil-qual').value;
+  return contacts.filter(c=>{
+    const match=!q||(c.fn+' '+c.ln).toLowerCase().includes(q)||c.company.toLowerCase().includes(q)||c.email.toLowerCase().includes(q)||(c.city||'').toLowerCase().includes(q);
+    return match&&(!fs||c.status===fs)&&(!fst||c.state===fst)&&(!fq||c.qualified===fq);
+  }).sort((a,b)=>{
+    let va=a[sortKey]||'', vb=b[sortKey]||'';
+    return String(va).localeCompare(String(vb))*sortDir;
+  });
+}
+
+function sortBy(k){ if(sortKey===k)sortDir*=-1; else{sortKey=k;sortDir=1;} render(); }
+
+function render(){
+  const data=getFiltered();
+  document.getElementById('st-total').textContent=contacts.length;
+  document.getElementById('st-not').textContent=contacts.filter(c=>c.status==='Not Contacted').length;
+  document.getElementById('st-email-sent').textContent=contacts.filter(c=>c.status==='Email Sent').length;
+  document.getElementById('st-sms').textContent=contacts.filter(c=>c.status==='SMS Sent').length;
+  document.getElementById('st-replied').textContent=contacts.filter(c=>c.status==='Replied').length;
+  document.getElementById('st-booked').textContent=contacts.filter(c=>c.status==='Booked ✓').length;
+  document.getElementById('st-verified').textContent=contacts.filter(c=>c.emailStatus==='Verified').length;
+  document.getElementById('st-qualified').textContent=contacts.filter(c=>c.qualified==='Qualified').length;
+  document.getElementById('count-lbl').textContent=`Showing ${data.length} of ${contacts.length}`;
+
+  document.getElementById('tbody').innerHTML=data.map((c,i)=>{
+    const sc=statusColors[c.status]||statusColors['Not Contacted'];
+    const smsMsg=encodeURIComponent(`Hey ${c.fn}! Quick question — how many old estimates do you have sitting there that homeowners never responded to?\n\nWe run a 60-Day Quote Recovery Sprint for tree companies — we follow up on those dead quotes and get them back on the schedule. Most owners recover $2,000–$5,000 in the first 30 days.\n\nNo extra work on your end. We handle everything.\n\nWorth a quick 10-minute chat? → quotefollow.com\n\n— Jonathan, QuoteFollow`);
+    const emailSubj=encodeURIComponent(`Quick question about your old tree service estimates`);
+    const emailBody=encodeURIComponent(`Hey ${c.fn},\n\nHope you're having a great week!\n\nQuick question — do you have old estimates sitting in your pipeline that homeowners never responded to?\n\nWe run a 60-Day Quote Recovery Sprint specifically for tree companies — we follow up on those dead estimates and get them back on your schedule. Most clients recover $2,000–$5,000 in the first 30 days.\n\nNo software to learn. No extra work on your end. Done for you.\n\nWould you be open to a quick 10-minute call this week?\n\nLearn more: quotefollow.com\n\nBest,\nJonathan Stride\nFounder, QuoteFollow\nhello@quotefollow.com`);
+    return `<tr>
+      <td style="color:var(--muted);font-size:11px;">${i+1}</td>
+      <td>
+        <div class="name">${c.fn} ${c.ln}</div>
+        <div class="title">${c.title}</div>
+        ${c.qualified==='Qualified'?'<span class="qual-yes">✓ Qualified</span>':''}
+      </td>
+      <td><div class="company">${c.company}</div></td>
+      <td>
+        <div class="email-val">${c.email}</div>
+        <span class="${c.emailStatus==='Verified'?'verified':'unverified'}">${c.emailStatus==='Verified'?'✓ Verified':'? Unverified'}</span>
+      </td>
+      <td><div class="phone">${c.phone||'—'}</div></td>
+      <td><div class="location">${c.city?c.city+', ':''} ${c.state}</div></td>
+      <td>
+        <div style="display:flex;flex-direction:column;gap:3px;">
+          ${c.website?`<a class="ext-link" href="${c.website}" target="_blank">🌐 Web</a>`:''}
+          ${c.linkedin?`<a class="ext-link" href="${c.linkedin}" target="_blank">💼 LinkedIn</a>`:''}
+          ${c.facebook?`<a class="ext-link" href="${c.facebook}" target="_blank">📘 Facebook</a>`:''}
+        </div>
+      </td>
+      <td>
+        <select class="status-sel" style="${sc}" onchange="updateStatus(${c.id},this.value)">
+          <option ${c.status==='Not Contacted'?'selected':''}>Not Contacted</option>
+          <option ${c.status==='Email Sent'?'selected':''}>Email Sent</option>
+          <option ${c.status==='SMS Sent'?'selected':''}>SMS Sent</option>
+          <option ${c.status==='Replied'?'selected':''}>Replied</option>
+          <option ${c.status==='Booked ✓'?'selected':''}>Booked ✓</option>
+        </select>
+      </td>
+      <td style="max-width:130px;">
+        ${c.notes?`<span style="font-size:11px;color:var(--muted);">${c.notes}</span>`:'<span style="font-size:10px;color:var(--muted);font-style:italic;">—</span>'}
+      </td>
+      <td>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">
+          <a class="btn btn-email" href="mailto:${c.email}?subject=${emailSubj}&body=${emailBody}">✉ Email</a>
+          ${c.phone?`<a class="btn btn-wa" href="https://api.whatsapp.com/send?phone=${c.phone.replace(/\D/g,'')}&text=${smsMsg}" target="_blank">📱 SMS</a>`:''}
+          <button class="btn btn-edit" onclick="openEdit(${c.id})">✏️</button>
+          <button class="btn btn-del" onclick="openDel(${c.id})">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function updateStatus(id,status){
+  const c=contacts.find(x=>x.id===id);
+  if(c){c.status=status;render();toast('Status updated!');}
+}
+
+function openAdd(){
+  editId=null;
+  document.getElementById('modal-title').textContent='Add Contact';
+  document.getElementById('modal-sub').textContent='Fill in what you know';
+  clearForm();
+  document.getElementById('modal').classList.add('open');
+}
+
+function openEdit(id){
+  editId=id;
+  const c=contacts.find(x=>x.id===id);
+  if(!c)return;
+  document.getElementById('modal-title').textContent='Edit Contact';
+  document.getElementById('modal-sub').textContent=c.fn+' '+c.ln+' · '+c.company;
+  document.getElementById('f-fn').value=c.fn;
+  document.getElementById('f-ln').value=c.ln;
+  document.getElementById('f-title').value=c.title;
+  document.getElementById('f-company').value=c.company;
+  document.getElementById('f-email').value=c.email;
+  document.getElementById('f-emailstatus').value=c.emailStatus;
+  document.getElementById('f-phone').value=c.phone;
+  document.getElementById('f-city').value=c.city;
+  document.getElementById('f-state').value=c.state;
+  document.getElementById('f-website').value=c.website;
+  document.getElementById('f-linkedin').value=c.linkedin;
+  document.getElementById('f-facebook').value=c.facebook;
+  document.getElementById('f-status').value=c.status;
+  document.getElementById('f-notes').value=c.notes;
+  document.getElementById('modal').classList.add('open');
+}
+
+function saveRecord(){
+  const fn=document.getElementById('f-fn').value.trim();
+  if(!fn){alert('First name is required!');return;}
+  const rec={fn,ln:document.getElementById('f-ln').value.trim(),title:document.getElementById('f-title').value.trim(),company:document.getElementById('f-company').value.trim(),email:document.getElementById('f-email').value.trim(),emailStatus:document.getElementById('f-emailstatus').value,phone:document.getElementById('f-phone').value.trim(),city:document.getElementById('f-city').value.trim(),state:document.getElementById('f-state').value.trim(),country:'United States',website:document.getElementById('f-website').value.trim(),linkedin:document.getElementById('f-linkedin').value.trim(),facebook:document.getElementById('f-facebook').value.trim(),status:document.getElementById('f-status').value,notes:document.getElementById('f-notes').value.trim(),qualified:''};
+  if(editId){
+    const i=contacts.findIndex(x=>x.id===editId);
+    contacts[i]={...contacts[i],...rec};
+    toast('Contact updated!');
+  }else{
+    rec.id=nextId++;
+    contacts.push(rec);
+    toast('Contact added!');
+  }
+  closeModal();render();
+}
+
+function clearForm(){
+  ['f-fn','f-ln','f-title','f-company','f-email','f-phone','f-city','f-state','f-website','f-linkedin','f-facebook','f-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-emailstatus').value='Verified';
+  document.getElementById('f-status').value='Not Contacted';
+}
+
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+
+function openDel(id){
+  deleteId=id;
+  const c=contacts.find(x=>x.id===id);
+  document.getElementById('del-name').textContent=`Delete "${c.fn} ${c.ln} — ${c.company}"? This cannot be undone.`;
+  document.getElementById('del-modal').classList.add('open');
+}
+
+function doDelete(){
+  contacts=contacts.filter(x=>x.id!==deleteId);
+  closeDel();render();toast('Contact deleted.');
+}
+
+function closeDel(){document.getElementById('del-modal').classList.remove('open');deleteId=null;}
+
+function exportCSV(){
+  const headers=['#','First Name','Last Name','Title','Company','Email','Email Status','Phone','City','State','Website','LinkedIn','Facebook','Status','Notes'];
+  const rows=contacts.map((c,i)=>[i+1,c.fn,c.ln,c.title,c.company,c.email,c.emailStatus,c.phone,c.city,c.state,c.website,c.linkedin,c.facebook,c.status,c.notes].map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(','));
+  const csv=[headers.join(','),...rows].join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='quotefollow-apollo-leads.csv';
+  a.click();
+  toast('CSV exported!');
+}
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.style.display='block';
+  setTimeout(()=>t.style.display='none',2500);
+}
+
+['modal','del-modal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',e=>{
+    if(e.target===document.getElementById(id)){
+      if(id==='modal')closeModal();
+      else closeDel();
+    }
+  });
+});
+
+render();
+</script>
+</body>
+</html>
